@@ -1,56 +1,50 @@
-import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { Stack } from 'expo-router';
+import type { ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
+import { PantallaError } from '@/components/PaginaError';
+import { colors } from '@/constants/theme';
+import { hidratar, useDb } from '@/lib/store';
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  anchor: '(tabs)',
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// La pantalla de carga se mantiene hasta leer la "base de datos" local (AsyncStorage).
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
+/** Error 500: cualquier fallo inesperado al dibujar una pantalla cae aquí (en lugar de dejarla en blanco). */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return <PantallaError codigo={500} error={error} onReintentar={retry} />;
 }
 
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+/**
+ * Layout raíz. Responsabilidades:
+ *  1. Hidratar la base de datos mock desde AsyncStorage una sola vez.
+ *  2. Declarar el Stack. La zona (admin) lleva pestañas inferiores y protección por rol; el login
+ *     original no lleva cabecera y "Agendar cita" usa la cabecera nativa con "atrás".
+ */
+export default function RootLayout() {
+  const { hidratado } = useDb();
+
+  useEffect(() => {
+    void hidratar();
+  }, []);
+
+  useEffect(() => {
+    if (hidratado) void SplashScreen.hideAsync();
+  }, [hidratado]);
+
+  if (!hidratado) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+    <>
+      <StatusBar style="auto" />
+      <Stack screenOptions={{ headerTintColor: colors.primario, headerTitleStyle: { color: colors.texto } }}>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="agendar-cita" options={{ title: 'Agendar cita' }} />
+        <Stack.Screen name="error" options={{ title: 'Error' }} />
+        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
       </Stack>
-    </ThemeProvider>
+    </>
   );
 }
