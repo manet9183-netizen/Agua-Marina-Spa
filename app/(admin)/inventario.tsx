@@ -13,14 +13,6 @@ import { ApiError, obtenerInventario, registrarMovimiento } from '@/lib/api';
 import { useDb } from '@/lib/store';
 import type { MovimientoInventario } from '@/lib/types';
 
-/**
- * INT-09 · Inventario y alertas de stock (CU-06, ENT-08, SAL-07; RF-M04-02/03, RNB-04).
- *  - Alerta cuando existencia <= mínimo (RNB-04): se resalta en la tabla y en un
- *    aviso superior. En la app móvil además será una notificación push; en web la
- *    alerta es visual (las push requieren service worker y quedan como mejora).
- *  - Ningún movimiento puede dejar el stock en negativo (lo valida la API).
- *  - "Ajuste" fija la existencia al conteo físico indicado.
- */
 const TIPOS: MovimientoInventario['tipo'][] = ['entrada', 'salida', 'ajuste'];
 
 export default function Inventario() {

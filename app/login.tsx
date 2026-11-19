@@ -1,18 +1,12 @@
 import { Redirect, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-
 import { loginStyles as styles } from '@/constants/Styles/login.styles';
 import { useSession } from '@/hooks/useSession';
 import { ApiError, iniciarSesion } from '@/lib/api';
 import { CUENTA_DEMO_ADMIN } from '@/lib/seed';
 import { validarCorreo } from '@/lib/validation';
 
-/**
- * Inicio de sesión de la administradora. Conserva el diseño original de la app (fondo oscuro,
- * tarjeta blanca, botón morado; estilos en constants/Styles/login.styles.ts). La app es solo para
- * la administradora, así que ya no hay selector de rol ni registro de clientes.
- */
 export default function Login() {
   const router = useRouter();
   const { listo, usuario } = useSession();

@@ -16,12 +16,6 @@ import { claveDia, desdeClaveYHora, formatoFechaCorta, formatoFechaLarga, proxim
 import { dinero, duracion } from '@/lib/format';
 import { useDb } from '@/lib/store';
 
-/**
- * Agendar cita (la hace la administradora para una clienta). Pasos: 1) clienta (cuenta por correo
- * o solo nombre) · 2) servicios · 3) fecha · 4) hora libre · 5) confirmar. La hora no se teclea:
- * se elige entre los horarios libres (una sola cabina). Si el horario se ocupa, la API devuelve
- * los 3 siguientes libres y se ofrecen como botones.
- */
 const DIAS_VISIBLES = 21;
 
 export default function AgendarCita() {
